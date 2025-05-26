@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>
+		.input {
+			width: 200px;
+			height: fit-content;
+			border: 1px solid black;
+		}
+
+		.button {
+			width: 100px;
+			height: fit-content;
+			border: 1px solid black;
+			font-size: 20px;
+			text-align: center;
+			background-color: black;
+			color: white;
+		}
+	</style>
+</head>
+
+<body>
+	<label for="ask1">内容: </label>
+	<input type="text" id="ask1" class="input">
+	<br>
+	<label for="ask2">体量(数字范围是:0 &lt; n &le; 200): </label>
+	<input type="text" id="ask2" class="input">
+	<br>
+	<button id="submit" class="button">提交</button>
+	<script>
+		const inputContext = document.querySelector("#ask1")
+		const inputAmount = document.querySelector("#ask2")
+		const submit = document.querySelector("#submit")
+		submit.addEventListener("click", () => {
+			if (inputContext.value === "" || inputAmount.value <= 0 || inputAmount.value >= 200) {
+				alert("请检查你的查询目标和体量")
+			}
+			else {
+				fetch("http://localhost:8080/test", {
+					method: "POST",
+					body: JSON.stringify({data: 666 ,context: inputContext.value, amount: inputAmount.value }),
+					headers: {
+						"Content-Type": "application/json"
+					}
+				})
+					.then(response => response.json())
+					.then(data => console.log(data))
+					.catch(error => console.error('Error:', error))
+			}
+		});
+	</script>
+</body>
+
+</html>
