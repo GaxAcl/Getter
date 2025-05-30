@@ -8,7 +8,7 @@ from fake_useragent import UserAgent
 def get_headers() -> dict:
     ua = UserAgent(platforms=['desktop'], browsers=['Edge']).random
     headers = {'User-Agent': ua}
-    print("随机获得的请求头部",headers)
+    # print("随机获得的请求头部",headers)
     return headers
 
 
@@ -37,18 +37,33 @@ def search_href(url, headers) -> Optional[list]:
     websiteFind = soup.find_all('a',attrs={'target':'_blank'})
     total = total + len(websiteFind)
     for i in websiteFind:
-        websiteList.append({i.get('href'),i.get_text()})
-    return websiteList
+        websiteList.append(i)
+    return None
 
 
 def search_website(searchUrl, amount):
     if total < amount:
-        newUrl = (searchUrl + "first{}").format(str(total+1))
+        newUrl = f"{searchUrl}&first={amount}"
         search_href(newUrl, get_headers())
         return search_website(searchUrl, amount)
+    else:
+        with open("test.html","w",encoding="utf-8") as f:
+            for i in websiteList:
+                href = i.get("href")
+                text = i.get_text()
+                if href is None:
+                    continue
+                else:
+                    f.write(href)
+                    f.write("     ")
+                    f.write(text)
+                    f.write("\n")
+            f.close()
+        return "OK"
 
 
 if __name__ == '__main__':
     total = 0
     websiteList = []
+    search_website(searchUrl=get_url(), amount=10)
     print("OK")
