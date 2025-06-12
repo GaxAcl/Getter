@@ -5,7 +5,18 @@ from typing import Optional
 from fake_useragent import UserAgent
 
 
-def get_headers() -> dict:
+def get_amount() -> Optional[int]:
+    """用于获取请求的体量
+    :return: 一个int类型的体量
+    """
+    searchAmount = int(input("请输入查找体量： "))
+    if  searchAmount < 1 or searchAmount > 100:
+        return get_amount()
+    else:
+        return searchAmount
+
+
+def get_headers() -> Optional[dict]:
     """用于获取随机请求头部
     :arg:无输入
     :return:一个dict类型的请求头
@@ -16,7 +27,7 @@ def get_headers() -> dict:
     return headers
 
 
-def get_url() -> str:
+def get_url() -> Optional[str]:
     """用于获取用户搜索网页
     :arg:无输入
     :return:一个str类型的url地址
@@ -74,5 +85,5 @@ def search_href(searchUrl:str, headers:dict, amount:int) -> Optional[list]:
 if __name__ == '__main__':
     total = 0
     websiteList = []
-    search_href(searchUrl=get_url(), headers=get_headers(), amount=10)
+    search_href(searchUrl=get_url(), headers=get_headers(), amount=get_amount())
     print("OK")
