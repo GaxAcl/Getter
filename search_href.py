@@ -6,6 +6,10 @@ from fake_useragent import UserAgent
 
 
 def get_headers() -> dict:
+    """用于获取随机请求头部
+    :arg:无输入
+    :return:一个dict类型的请求头
+    """
     ua = UserAgent(platforms=['desktop'], browsers=['Edge']).random
     headers = {'User-Agent': ua}
     # print("随机获得的请求头部",headers)
@@ -13,6 +17,10 @@ def get_headers() -> dict:
 
 
 def get_url() -> str:
+    """用于获取用户搜索网页
+    :arg:无输入
+    :return:一个str类型的url地址
+    """
     searchWeb = 'https://cn.bing.com/search?q={}'
     searchFinding = str(input("请输入想要搜索的东西: "))
     if searchFinding == '':
@@ -22,11 +30,17 @@ def get_url() -> str:
     return searchUrl
 
 
-def search_href(url, headers) -> Optional[list]:
+def search_href(searchUrl:str, headers:dict, amount:int) -> Optional[list]:
+    """爬取目标url的网址
+    :param searchUrl: 一个str类型的url地址
+    :param headers: 一个dict类型的请求头
+    :param amount: 一个int类型的数量限制
+    :return: 一个列表包含所有获得的网址
+    """
     global total, websiteList
     if headers is None:
         headers = get_headers()
-    response = requests.get(url, headers)
+    response = requests.get(searchUrl, headers)
     if response.status_code == 200:
         response.encoding = 'utf-8'
         html = response.text
@@ -34,18 +48,13 @@ def search_href(url, headers) -> Optional[list]:
         print("请求失败")
         return None
     soup = BeautifulSoup(html,"lxml")
-    websiteFind = soup.find_all('a',attrs={'target':'_blank'})
+    websiteFind = soup.find_all('li',attrs={'_class':'b_logo'})
     total = total + len(websiteFind)
     for i in websiteFind:
         websiteList.append(i)
-    return None
-
-
-def search_website(searchUrl, amount):
-    if total < amount:
+    if amount < total:
         newUrl = f"{searchUrl}&first={amount}"
-        search_href(newUrl, get_headers())
-        return search_website(searchUrl, amount)
+        search_href(newUrl, get_headers(),amount)
     else:
         with open("test.html","w",encoding="utf-8") as f:
             for i in websiteList:
@@ -59,11 +68,11 @@ def search_website(searchUrl, amount):
                     f.write(text)
                     f.write("\n")
             f.close()
-        return "OK"
+    return None
 
 
 if __name__ == '__main__':
     total = 0
     websiteList = []
-    search_website(searchUrl=get_url(), amount=10)
+    search_href(searchUrl=get_url(), headers=get_headers(), amount=10)
     print("OK")
