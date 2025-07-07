@@ -41,49 +41,77 @@ def get_url() -> Optional[str]:
     return searchUrl
 
 
-def search_href(searchUrl:str, headers:dict, amount:int) -> Optional[list]:
-    """爬取目标url的网址
-    :param searchUrl: 一个str类型的url地址
+def get_website(searchUrl: str, headers:dict, websiteList: list) -> Optional[list]:
+    """用于获取当前序列号页面的所有网址
+    :param searchUrl: 一个str类型的url
     :param headers: 一个dict类型的请求头
-    :param amount: 一个int类型的数量限制
-    :return: 一个列表包含所有获得的网址
+    :param websiteList: 一个list类型的网站列表
+    :return: 一个list类型的新网站列表
     """
-    global total, websiteList
     if headers is None:
         headers = get_headers()
-    response = requests.get(searchUrl, headers)
-    if response.status_code == 200:
-        response.encoding = 'utf-8'
-        html = response.text
-    else:
-        print("请求失败")
+    responses = requests.get(searchUrl, headers=headers)
+    if responses.status_code != 200:
+        websiteList.append(None)
         return None
-    soup = BeautifulSoup(html,"lxml")
-    websiteFind = soup.find_all('li',attrs={'_class':'b_logo'})
-    total = total + len(websiteFind)
-    for i in websiteFind:
-        websiteList.append(i)
-    if amount < total:
-        newUrl = f"{searchUrl}&first={amount}"
-        search_href(newUrl, get_headers(),amount)
-    else:
-        with open("test.html","w",encoding="utf-8") as f:
-            for i in websiteList:
-                href = i.get("href")
-                text = i.get_text()
-                if href is None:
-                    continue
-                else:
-                    f.write(href)
-                    f.write("     ")
-                    f.write(text)
-                    f.write("\n")
-            f.close()
-    return None
+    soup = BeautifulSoup(responses.content, 'lxml')
+    websiteListFind = soup.find_all('li', attrs={'_class':'b_logo'})
+    for i in websiteListFind:
+        websiteList.append({'website': i.get('href'),
+                            'name': i.get('text')})
+    return websiteList
+
+
+# def search_amount_control(amount:int, total:int):
+#     searchUrl = get_url()
+#     websiteList = []
+#     if amount < 1:
+#         amount = get_amount()
+#     if total < amount:
+#         websiteList = get_website(searchUrl , get_headers(), websiteList)
+
+# def search_href(searchUrl:str, headers:dict, amount:int) -> Optional[list]:
+#     """爬取目标url的网址
+#     :param searchUrl: 一个str类型的url地址
+#     :param headers: 一个dict类型的请求头
+#     :param amount: 一个int类型的数量限制
+#     :return: 一个列表包含所有获得的网址
+#     """
+#     global total, websiteList
+#     if headers is None:
+#         headers = get_headers()
+#     response = requests.get(searchUrl, headers)
+#     if response.status_code == 200:
+#         response.encoding = 'utf-8'
+#         html = response.text
+#     else:
+#         print("请求失败")
+#         return None
+#     soup = BeautifulSoup(html,"lxml")
+#     websiteFind = soup.find_all('li',attrs={'_class':'b_logo'})
+#     total = total + len(websiteFind)
+#     for i in websiteFind:
+#         websiteList.append(i)
+#     if amount < total:
+#         newUrl = f"{searchUrl}&first={amount}"
+#         search_href(newUrl, get_headers(),amount)
+#     else:
+#         with open("test.html","w",encoding="utf-8") as f:
+#             for i in websiteList:
+#                 href = i.get("href")
+#                 text = i.get_text()
+#                 if href is None:
+#                     continue
+#                 else:
+#                     f.write(href)
+#                     f.write("     ")
+#                     f.write(text)
+#                     f.write("\n")
+#             f.close()
+#     return None
 
 
 if __name__ == '__main__':
-    total = 0
-    websiteList = []
-    search_href(searchUrl=get_url(), headers=get_headers(), amount=get_amount())
+    # websiteList = []
+    # search_href(searchUrl=get_url(), headers=get_headers(), amount=get_amount())
     print("OK")
